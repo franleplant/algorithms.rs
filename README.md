@@ -6,6 +6,11 @@ I'm learning more about algorithms via an MIT Course and "Introduction to Algori
 In here I'm going to be putting all the Rust implementation for the studied material.
 
 
-It requires Rust nightly due to the use of the `cargo bench` functionality
 
+## Run them
 
+```sh
+# run examples
+cargo test -- --no-capture
+
+```
