@@ -1,3 +1,5 @@
+extern crate test;
+
 // TODO accept any type of number ?
 fn find_max_crossing_subarray(arr: &[f64]) -> (usize, usize, f64) {
     let len = arr.len();
@@ -71,10 +73,10 @@ pub fn find_max_subarray(arr: &[f64]) -> (usize, usize, f64) {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn it_works() {
-        use super::*;
-
         let input: Vec<f64> = vec![13, -3, -25, 20, -3, -16, -23, 18, 20, -7, 12, -5, -22, 15, -4, 7]
             .iter()
             .map(|&x| x as f64)
@@ -87,5 +89,16 @@ mod tests {
         let &(low, high, _) = &result;
         println!("max sub {:?}, {:?}", result, &input[low..high]);
         assert_eq!(result, (7, 10, 43f64));
+    }
+
+
+    #[bench]
+    fn bench_1(b: &mut test::Bencher) {
+        let input: Vec<f64> = vec![13, -3, -25, 20, -3, -16, -23, 18, 20, -7, 12, -5, -22, 15, -4, 7]
+            .iter()
+            .map(|&x| x as f64)
+            .collect();
+
+        b.iter(|| find_max_subarray(&input[..]));
     }
 }
