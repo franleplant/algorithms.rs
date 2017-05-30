@@ -9,14 +9,14 @@ fn find_max_crossing_subarray(arr: &[f64]) -> (usize, usize, f64) {
     let low_mid = mid.floor() as usize;
     let high_mid = mid.ceil() as usize;
 
-    //println!("len {} mid: {}, low: ({}, {}), high: ({}, {})", len, mid, low, low_mid, high_mid, high);
+    // println!("len {} mid: {}, low: ({}, {}), high: ({}, {})", len, mid, low, low_mid, high_mid, high);
 
-    let mut left_sum = - ::std::f64::INFINITY;
+    let mut left_sum = -::std::f64::INFINITY;
     let mut sum = 0f64;
     let mut max_left = 0;
 
     for i in (low..low_mid + 1).rev() {
-        //println!("{}", i);
+        // println!("{}", i);
         let el = arr[i];
         sum = sum + el;
         if sum > left_sum {
@@ -25,12 +25,12 @@ fn find_max_crossing_subarray(arr: &[f64]) -> (usize, usize, f64) {
         }
     }
 
-    let mut right_sum = - ::std::f64::INFINITY;
+    let mut right_sum = -::std::f64::INFINITY;
     let mut sum = 0f64;
     let mut max_right = 0;
 
     for i in high_mid..high + 1 {
-        //println!("{}", i);
+        // println!("{}", i);
         let el = arr[i];
         sum = sum + el;
         if sum > right_sum {
@@ -56,8 +56,8 @@ pub fn find_max_subarray(arr: &[f64]) -> (usize, usize, f64) {
     let low_mid = mid.floor() as usize;
     let high_mid = mid.ceil() as usize;
 
-    let (left_low, left_high, left_sum) = find_max_subarray(&arr[low..low_mid+1]);
-    let (right_low, right_high, right_sum) = find_max_subarray(&arr[high_mid..high+1]);
+    let (left_low, left_high, left_sum) = find_max_subarray(&arr[low..low_mid + 1]);
+    let (right_low, right_high, right_sum) = find_max_subarray(&arr[high_mid..high + 1]);
     let (cross_low, cross_high, cross_sum) = find_max_crossing_subarray(&arr[..]);
 
 
@@ -77,7 +77,8 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let input: Vec<f64> = vec![13, -3, -25, 20, -3, -16, -23, 18, 20, -7, 12, -5, -22, 15, -4, 7]
+        let input: Vec<f64> = vec![13, -3, -25, 20, -3, -16, -23, 18, 20, -7, 12, -5, -22, 15, -4,
+                                   7]
             .iter()
             .map(|&x| x as f64)
             .collect();
@@ -94,7 +95,8 @@ mod tests {
 
     #[bench]
     fn bench_1(b: &mut test::Bencher) {
-        let input: Vec<f64> = vec![13, -3, -25, 20, -3, -16, -23, 18, 20, -7, 12, -5, -22, 15, -4, 7]
+        let input: Vec<f64> = vec![13, -3, -25, 20, -3, -16, -23, 18, 20, -7, 12, -5, -22, 15, -4,
+                                   7]
             .iter()
             .map(|&x| x as f64)
             .collect();
