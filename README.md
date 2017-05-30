@@ -1,4 +1,4 @@
-# Algorithms in Rust!
+# Algorithms in Rust! [![Build Status](https://travis-ci.org/franleplant/algorithms.rs.svg?branch=master)](https://travis-ci.org/franleplant/algorithms.rs)
 
 
 I'm learning more about algorithms via an MIT Course and "Introduction to Algorithms" by Cormen et. al.
