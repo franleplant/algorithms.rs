@@ -16,9 +16,9 @@ fn find_max_crossing_subarray(arr: &[f64]) -> (usize, usize, f64) {
     let mut max_left = 0;
 
     for i in (low..low_mid + 1).rev() {
-        // println!("{}", i);
         let el = arr[i];
-        sum = sum + el;
+        println!("left {}", i);
+        sum += el;
         if sum > left_sum {
             left_sum = sum;
             max_left = i;
@@ -30,9 +30,9 @@ fn find_max_crossing_subarray(arr: &[f64]) -> (usize, usize, f64) {
     let mut max_right = 0;
 
     for i in high_mid..high + 1 {
-        // println!("{}", i);
+        println!("right {}", i);
         let el = arr[i];
-        sum = sum + el;
+        sum += el;
         if sum > right_sum {
             right_sum = sum;
             max_right = i;
