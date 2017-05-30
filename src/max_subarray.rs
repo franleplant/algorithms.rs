@@ -9,7 +9,8 @@ fn find_max_crossing_subarray(arr: &[f64]) -> (usize, usize, f64) {
     let low_mid = mid.floor() as usize;
     let high_mid = mid.ceil() as usize;
 
-    // println!("len {} mid: {}, low: ({}, {}), high: ({}, {})", len, mid, low, low_mid, high_mid, high);
+    // println!("len {} mid: {}, low: ({}, {}), high: ({}, {})",
+    // len, mid, low, low_mid, high_mid, high);
 
     let mut left_sum = -::std::f64::INFINITY;
     let mut sum = 0f64;
