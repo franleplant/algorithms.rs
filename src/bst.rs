@@ -12,7 +12,7 @@ impl Keyable for i32 {
 }
 
 #[derive(Debug)]
-pub struct Node<T: Keyable + Debug > {
+pub struct Node<T: Keyable + Debug> {
     data: T,
     parent: Option<usize>,
     left: Option<usize>,
@@ -20,7 +20,7 @@ pub struct Node<T: Keyable + Debug > {
 }
 
 #[derive(Debug)]
-pub struct Bst<T: Keyable + Debug > {
+pub struct Bst<T: Keyable + Debug> {
     root: Option<usize>,
     nodes: Vec<Node<T>>,
 }
@@ -33,45 +33,42 @@ impl<T: Keyable + Debug> Bst<T> {
         }
     }
 
-    pub fn insert(&mut self, data: T) {
-        // New
-        let node_index = self.nodes.len();
+    pub fn insert(&mut self, new_data: T) {
+        let new = self.nodes.len();
+        let mut maybe_previous = None;
+        let mut maybe_current = self.root;
 
-        // Previous ptr
-        let mut y = None;
-        // Current ptr
-        let mut x = self.root;
-
-        while let Some(x_index) = x {
-            y = x;
-            if data.get_key() < self.nodes[x_index].data.get_key() {
-                x = self.nodes[x_index].left;
+        while let Some(current) = maybe_current {
+            maybe_previous = maybe_current;
+            maybe_current = if new_data.get_key() < self.nodes[current].data.get_key() {
+                self.nodes[current].left
             } else {
-                x = self.nodes[x_index].right;
-            }
+                self.nodes[current].right
+            };
         }
 
-        match y {
+        match maybe_previous {
             None => {
                 self.root = Some(0);
             }
 
-            Some(y_index) => {
-                if data.get_key() < self.nodes[y_index].data.get_key() {
-                    self.nodes[y_index].left = Some(node_index);
+            Some(previous) => {
+                if new_data.get_key() < self.nodes[previous].data.get_key() {
+                    self.nodes[previous].left = Some(new);
                 } else {
-                    self.nodes[y_index].right = Some(node_index);
+                    self.nodes[previous].right = Some(new);
                 }
             }
         }
 
-        let node = Node {
-            data: data,
-            parent: y,
+        let new_node = Node {
+            data: new_data,
+            parent: maybe_previous,
             left: None,
             right: None,
         };
-        self.nodes.push(node);
+
+        self.nodes.push(new_node);
     }
 
 
@@ -93,11 +90,6 @@ impl<T: Keyable + Debug> Bst<T> {
     pub fn inorder_walk(&self) {
         self.inorder_walk_by_index(0);
     }
-
-
-
-
-
 }
 
 #[cfg(test)]
