@@ -43,8 +43,8 @@ mod tests {
         insertion_sort(arr.as_mut_slice());
         assert_eq!(arr, vec![1, 2, 4]);
 
-        let mut arr = vec![5,2,4,6,1,3];
+        let mut arr = vec![5, 2, 4, 6, 1, 3];
         insertion_sort(arr.as_mut_slice());
-        assert_eq!(arr, vec![1,2,3,4,5,6]);
+        assert_eq!(arr, vec![1, 2, 3, 4, 5, 6]);
     }
 }
