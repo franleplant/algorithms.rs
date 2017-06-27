@@ -50,30 +50,31 @@ impl PartialEq for BigInt {
 
 impl Add for BigInt {
     type Output = BigInt;
-    fn add(self, rhs: BigInt) -> BigInt {
+    fn add(self, other: BigInt) -> BigInt {
         let self_len = self.get_len();
-        let other_len = rhs.get_len();
+        let other_len = other.get_len();
+        let max_len = if self_len >= other_len {
+            self_len
+        } else {
+            other_len
+        };
 
-        let mut i = 0;
         let mut carry = 0;
         let mut numbers = vec![];
-        loop {
-            if i > self_len && i > other_len {
-                break;
-            }
 
+        // at most we can end up with a len + 1 bigint
+        for i in 0..(max_len + 1) {
             let a = self.get_digit(i);
-            let b = rhs.get_digit(i);
+            let b = other.get_digit(i);
 
-            let mut sum = a + b + carry;
-            if sum >= 10 {
-                carry = sum / 10;
-                sum = sum - 10;
+            let mut res = a + b + carry;
+            if res >= 10 {
+                carry = res / 10;
+                res = res - 10;
             }
 
-            //println!("a {} b {} sum {} carry {}", a,b,sum,carry);
-            numbers.push(sum);
-            i += 1;
+            //println!("a {} b {} res {} carry {}", a,b,res,carry);
+            numbers.push(res);
         }
 
         BigInt::new(numbers.iter().cloned().rev().collect())
@@ -85,15 +86,16 @@ impl Sub for BigInt {
     fn sub(self, other: BigInt) -> BigInt {
         let self_len = self.number.len();
         let other_len = other.number.len();
+        let max_len = if self_len >= other_len {
+            self_len
+        } else {
+            other_len
+        };
 
-        let mut i = 0;
         let mut carry = 0;
         let mut numbers = vec![];
-        loop {
-            if i > self_len && i > other_len {
-                break;
-            }
 
+        for i in 0..max_len {
             let a = self.get_digit(i);
             let b = other.get_digit(i);
             //println!("1) {} - {} - {}", a,b,carry);
@@ -110,7 +112,6 @@ impl Sub for BigInt {
 
             //println!("2) = {}  with carry {}", res,carry);
             numbers.push(res);
-            i += 1;
         }
 
         BigInt::new(numbers.iter().cloned().rev().collect())
