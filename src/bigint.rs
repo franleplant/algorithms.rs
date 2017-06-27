@@ -9,9 +9,7 @@ struct BigInt {
 
 impl BigInt {
     pub fn new(number: Vec<usize>) -> BigInt {
-        BigInt {
-            number: number,
-        }
+        BigInt { number: number }
     }
 
     pub fn get_digit(&self, index: usize) -> usize {
@@ -48,7 +46,7 @@ impl Add for BigInt {
                 sum = sum - 10;
             }
 
-            println!("a {} b {} sum {} carry {}", a,b,sum,carry);
+            println!("a {} b {} sum {} carry {}", a, b, sum, carry);
             numbers.push(sum);
             i += 1;
         }
@@ -64,8 +62,8 @@ mod tests {
 
     #[test]
     fn add() {
-        let n1 = BigInt::new(vec![9,9]);
-        let n2 = BigInt::new(vec![1,0]);
+        let n1 = BigInt::new(vec![9, 9]);
+        let n2 = BigInt::new(vec![1, 0]);
         let n3 = n1 + n2;
 
         assert_eq!(n3, BigInt::new(vec![1, 0, 9]))
