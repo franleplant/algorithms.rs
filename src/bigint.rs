@@ -41,6 +41,9 @@ impl PartialEq for BigInt {
         for i in 0..max_len {
             let digit_equality = self.get_digit(i) == other.get_digit(i);
             equality = equality && digit_equality;
+            if !equality {
+                break;
+            }
         }
 
         equality
