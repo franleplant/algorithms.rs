@@ -90,6 +90,41 @@ impl<T: Keyable + Debug> Bst<T> {
     pub fn inorder_walk(&self) {
         self.inorder_walk_by_index(0);
     }
+
+    fn preorder_walk_by_index(&self, x: usize, level: usize, connect: Vec<bool>) {
+        if let Some(x_node) = self.nodes.get(x) {
+
+            let separator = "|-- ";
+            let s = format!("{}{:?}", separator, x_node.data);
+            let space_n = level * separator.len();
+
+            let mut space = String::new();
+            for i in 0..space_n {
+                if i % separator.len() == 0 && connect[i / separator.len()] {
+                    space.push_str("|");
+                } else {
+                    space.push_str(" ");
+                }
+            }
+            println!("{}{}", space, s);
+
+            if let Some(left_index) = x_node.left {
+                let mut connect = connect.clone();
+                connect.push(true);
+                self.preorder_walk_by_index(left_index, level + 1, connect);
+            }
+
+            if let Some(right_index) = x_node.right {
+                let mut connect = connect.clone();
+                connect.push(false);
+                self.preorder_walk_by_index(right_index, level + 1, connect);
+            }
+        }
+    }
+
+    pub fn preorder_walk(&self) {
+        self.preorder_walk_by_index(0, 0, vec![false]);
+    }
 }
 
 #[cfg(test)]
@@ -103,8 +138,33 @@ mod tests {
         bst.insert(5);
         bst.insert(2);
         bst.insert(9);
-        println!("{:?}", bst);
+        println!("root {:?}", bst.root);
+        for (i, n) in bst.nodes.iter().enumerate() {
+            println!("{}, {:?}", i, n);
+        }
+        println!("");
 
         bst.inorder_walk();
+    }
+
+    #[test]
+    fn preorder() {
+        let mut bst = Bst::new();
+        bst.insert(12);
+        bst.insert(5);
+        bst.insert(2);
+        bst.insert(9);
+        bst.insert(3);
+        bst.insert(4);
+        bst.insert(51);
+        bst.insert(0);
+        bst.insert(1);
+        println!("root {:?}", bst.root);
+        for (i, n) in bst.nodes.iter().enumerate() {
+            println!("{}, {:?}", i, n);
+        }
+        println!("");
+
+        bst.preorder_walk();
     }
 }
