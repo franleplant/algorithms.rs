@@ -11,8 +11,8 @@ impl Keyable for i32 {
     }
 }
 
-#[derive(Debug)]
-pub struct Node<T: Keyable + Debug> {
+#[derive(Debug, PartialEq)]
+pub struct Node<T: Keyable + Debug + PartialOrd> {
     data: T,
     parent: Option<usize>,
     left: Option<usize>,
@@ -20,12 +20,12 @@ pub struct Node<T: Keyable + Debug> {
 }
 
 #[derive(Debug)]
-pub struct Bst<T: Keyable + Debug> {
+pub struct Bst<T: Keyable + Debug + PartialOrd> {
     root: Option<usize>,
     nodes: Vec<Node<T>>,
 }
 
-impl<T: Keyable + Debug> Bst<T> {
+impl<T: Keyable + Debug + PartialOrd> Bst<T> {
     pub fn new() -> Bst<T> {
         Bst {
             root: None,
@@ -125,6 +125,69 @@ impl<T: Keyable + Debug> Bst<T> {
     pub fn preorder_walk(&self) {
         self.preorder_walk_by_index(0, 0, vec![false]);
     }
+
+    pub fn search(&self, key: T) -> Option<&Node<T>> {
+        let mut x = self.root;
+
+        while let Some(index) = x {
+            let node = self.nodes.get(index).expect("WTF");
+
+            if key == node.data {
+                break;
+            }
+
+            x = if key < node.data {
+                node.left
+            } else {
+                node.right
+            }
+        }
+
+
+        if let Some(index) = x {
+            self.nodes.get(index)
+        } else {
+            None
+        }
+    }
+
+    pub fn min(&self) -> Option<&Node<T>> {
+        let mut x = self.root;
+
+        while let Some(index) = x {
+            let left = self.nodes.get(index).unwrap().left;
+            if left.is_none() {
+                break;
+            }
+
+            x = left
+        }
+
+        if let Some(index) = x {
+            self.nodes.get(index)
+        } else {
+            None
+        }
+    }
+
+    pub fn max(&self) -> Option<&Node<T>> {
+        let mut x = self.root;
+
+        while let Some(index) = x {
+            let right = self.nodes.get(index).unwrap().right;
+            if right.is_none() {
+                break;
+            }
+
+            x = right
+        }
+
+        if let Some(index) = x {
+            self.nodes.get(index)
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -166,5 +229,46 @@ mod tests {
         println!("");
 
         bst.preorder_walk();
+    }
+
+    #[test]
+    fn bst_search() {
+        let mut bst = Bst::new();
+        bst.insert(15);
+        bst.insert(18);
+        bst.insert(17);
+        bst.insert(20);
+        bst.insert(6);
+        bst.insert(3);
+        bst.insert(2);
+        bst.insert(4);
+        bst.insert(7);
+        bst.insert(13);
+        bst.insert(9);
+        bst.preorder_walk();
+
+        assert_eq!(15, bst.search(15).unwrap().data);
+        assert_eq!(13, bst.search(13).unwrap().data);
+        assert_eq!(None, bst.search(55));
+    }
+
+    #[test]
+    fn bst_min_max() {
+        let mut bst = Bst::new();
+        bst.insert(15);
+        bst.insert(18);
+        bst.insert(17);
+        bst.insert(20);
+        bst.insert(6);
+        bst.insert(3);
+        bst.insert(2);
+        bst.insert(4);
+        bst.insert(7);
+        bst.insert(13);
+        bst.insert(9);
+        //bst.preorder_walk();
+
+        assert_eq!(2, bst.min().unwrap().data);
+        assert_eq!(20, bst.max().unwrap().data);
     }
 }
