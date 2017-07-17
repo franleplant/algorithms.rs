@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+
 pub trait Keyable {
     fn get_key(&self) -> i32;
 }
@@ -17,6 +18,7 @@ pub struct Node<T: Keyable + Debug + PartialOrd> {
     parent: Option<usize>,
     left: Option<usize>,
     right: Option<usize>,
+    index: usize,
 }
 
 #[derive(Debug)]
@@ -66,6 +68,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
             parent: maybe_previous,
             left: None,
             right: None,
+            index: new,
         };
 
         self.nodes.push(new_node);
@@ -151,8 +154,8 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         }
     }
 
-    pub fn min(&self) -> Option<&Node<T>> {
-        let mut x = self.root;
+    pub fn min(&self, index: usize) -> Option<&Node<T>> {
+        let mut x = Some(index);
 
         while let Some(index) = x {
             let left = self.nodes.get(index).unwrap().left;
@@ -170,8 +173,8 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         }
     }
 
-    pub fn max(&self) -> Option<&Node<T>> {
-        let mut x = self.root;
+    pub fn max(&self, index: usize) -> Option<&Node<T>> {
+        let mut x = Some(index);
 
         while let Some(index) = x {
             let right = self.nodes.get(index).unwrap().right;
@@ -187,6 +190,39 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         } else {
             None
         }
+    }
+
+    pub fn successor(&self, index: usize) -> Option<&Node<T>> {
+        let mut x = self.nodes.get(index).expect("Wrong index");
+
+        if let Some(right_index) = x.right {
+            return self.min(right_index);
+        }
+
+        if x.parent != None {
+            let mut parent = self.nodes
+                .get(x.parent.unwrap())
+                .expect("Wrong parent index");
+
+            loop {
+                if parent.left != None {
+                    if parent.left.unwrap() == x.index {
+                        return Some(parent);
+                    }
+                }
+
+                if parent.parent != None {
+                    x = parent;
+                    parent = self.nodes
+                        .get(parent.parent.unwrap())
+                        .expect("Wrong parent index");
+                } else {
+                    break;
+                }
+            }
+        }
+
+        None
     }
 }
 
@@ -245,7 +281,7 @@ mod tests {
         bst.insert(7);
         bst.insert(13);
         bst.insert(9);
-        bst.preorder_walk();
+        //bst.preorder_walk();
 
         assert_eq!(15, bst.search(15).unwrap().data);
         assert_eq!(13, bst.search(13).unwrap().data);
@@ -268,7 +304,32 @@ mod tests {
         bst.insert(9);
         //bst.preorder_walk();
 
-        assert_eq!(2, bst.min().unwrap().data);
-        assert_eq!(20, bst.max().unwrap().data);
+        assert_eq!(2, bst.min(bst.root.unwrap()).unwrap().data);
+        assert_eq!(20, bst.max(bst.root.unwrap()).unwrap().data);
+    }
+
+    #[test]
+    fn bst_successor() {
+        let mut bst = Bst::new();
+        bst.insert(15);
+        bst.insert(18);
+        bst.insert(17);
+        bst.insert(20);
+        bst.insert(6);
+        bst.insert(3);
+        bst.insert(2);
+        bst.insert(4);
+        bst.insert(7);
+        bst.insert(13);
+        bst.insert(9);
+        println!("root {:?}", bst.root);
+        for (i, n) in bst.nodes.iter().enumerate() {
+            println!("{}, {:?}", i, n);
+        }
+        println!("");
+
+
+        assert_eq!(bst.successor(0).unwrap().data, 17);
+        assert_eq!(bst.successor(9).unwrap().data, 15);
     }
 }
