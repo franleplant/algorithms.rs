@@ -36,6 +36,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
     }
 
     pub fn insert(&mut self, new_data: T) {
+        debug_assert!(self.bst_invariant());
         let new = self.nodes.len();
         let mut maybe_previous = None;
         let mut maybe_current = self.root;
@@ -72,20 +73,41 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         };
 
         self.nodes.push(new_node);
+        debug_assert!(self.bst_invariant());
+    }
+
+    fn bst_invariant(&self) -> bool {
+        for node in &self.nodes {
+            if node.left != None {
+                let left = self.nodes.get(node.left.unwrap()).unwrap();
+                if !(node.data > left.data) {
+                    return false;
+                }
+            }
+
+            if node.right != None {
+                let right = self.nodes.get(node.right.unwrap()).unwrap();
+                if !(node.data < right.data) {
+                    return false;
+                }
+            }
+        }
+
+        true
     }
 
 
     fn inorder_walk_by_index(&self, x: usize) {
         if let Some(x_node) = self.nodes.get(x) {
 
-            if let Some(left_index) = x_node.left {
-                self.inorder_walk_by_index(left_index);
+            if x_node.left != None {
+                self.inorder_walk_by_index(x_node.left.unwrap());
             }
 
             println!("{:?}", x_node.data);
 
-            if let Some(right_index) = x_node.right {
-                self.inorder_walk_by_index(right_index);
+            if x_node.right != None {
+                self.inorder_walk_by_index(x_node.right.unwrap());
             }
         }
     }
@@ -132,8 +154,8 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
     pub fn search(&self, key: T) -> Option<&Node<T>> {
         let mut x = self.root;
 
-        while let Some(index) = x {
-            let node = self.nodes.get(index).expect("WTF");
+        while x != None {
+            let node = self.nodes.get(x.unwrap()).expect("WTF");
 
             if key == node.data {
                 break;
@@ -147,8 +169,8 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         }
 
 
-        if let Some(index) = x {
-            self.nodes.get(index)
+        if x != None {
+            self.nodes.get(x.unwrap())
         } else {
             None
         }
@@ -157,17 +179,17 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
     pub fn min(&self, index: usize) -> Option<&Node<T>> {
         let mut x = Some(index);
 
-        while let Some(index) = x {
-            let left = self.nodes.get(index).unwrap().left;
-            if left.is_none() {
+        while x != None {
+            let left = self.nodes.get(x.unwrap()).unwrap().left;
+            if left == None {
                 break;
             }
 
             x = left
         }
 
-        if let Some(index) = x {
-            self.nodes.get(index)
+        if x != None {
+            self.nodes.get(x.unwrap())
         } else {
             None
         }
@@ -176,17 +198,17 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
     pub fn max(&self, index: usize) -> Option<&Node<T>> {
         let mut x = Some(index);
 
-        while let Some(index) = x {
-            let right = self.nodes.get(index).unwrap().right;
-            if right.is_none() {
+        while x != None {
+            let right = self.nodes.get(x.unwrap()).unwrap().right;
+            if right == None {
                 break;
             }
 
             x = right
         }
 
-        if let Some(index) = x {
-            self.nodes.get(index)
+        if x != None {
+            self.nodes.get(x.unwrap())
         } else {
             None
         }
