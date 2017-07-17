@@ -1,6 +1,9 @@
 use std::fmt::Debug;
+use std::collections::HashMap;
 
 
+// TODO probably this is redundat since we are using PartialOrd
+// for comparing data directly, explore more
 pub trait Keyable {
     fn get_key(&self) -> i32;
 }
@@ -24,69 +27,70 @@ pub struct Node<T: Keyable + Debug + PartialOrd> {
 #[derive(Debug)]
 pub struct Bst<T: Keyable + Debug + PartialOrd> {
     root: Option<usize>,
-    nodes: Vec<Node<T>>,
+    nodes: HashMap<usize, Node<T>>,
+    last_index: usize,
 }
 
 impl<T: Keyable + Debug + PartialOrd> Bst<T> {
     pub fn new() -> Bst<T> {
         Bst {
             root: None,
-            nodes: vec![],
+            nodes: HashMap::new(),
+            last_index: 0,
         }
     }
 
     pub fn insert(&mut self, new_data: T) {
         debug_assert!(self.bst_invariant());
-        let new = self.nodes.len();
-        let mut maybe_previous = None;
-        let mut maybe_current = self.root;
+        let new_index = self.last_index;
+        let mut previous = None;
+        let mut current = self.root;
 
-        while let Some(current) = maybe_current {
-            maybe_previous = maybe_current;
-            maybe_current = if new_data.get_key() < self.nodes[current].data.get_key() {
-                self.nodes[current].left
+        while current != None {
+            let current_node = self.nodes.get(&current.unwrap()).unwrap();
+            previous = current;
+            current = if new_data < current_node.data {
+                current_node.left
             } else {
-                self.nodes[current].right
+                current_node.right
             };
         }
 
-        match maybe_previous {
-            None => {
-                self.root = Some(0);
-            }
-
-            Some(previous) => {
-                if new_data.get_key() < self.nodes[previous].data.get_key() {
-                    self.nodes[previous].left = Some(new);
-                } else {
-                    self.nodes[previous].right = Some(new);
-                }
+        if previous == None {
+            self.root = Some(0);
+        } else {
+            let previous_node = self.nodes.get_mut(&previous.unwrap()).unwrap();
+            if new_data < previous_node.data {
+                previous_node.left = Some(new_index);
+            } else {
+                previous_node.right = Some(new_index);
             }
         }
 
         let new_node = Node {
             data: new_data,
-            parent: maybe_previous,
+            parent: previous,
             left: None,
             right: None,
-            index: new,
+            index: new_index,
         };
 
-        self.nodes.push(new_node);
+        self.nodes.insert(new_index, new_node);
+        self.last_index += 1;
         debug_assert!(self.bst_invariant());
     }
 
     fn bst_invariant(&self) -> bool {
-        for node in &self.nodes {
+        for (_, node) in &self.nodes {
             if node.left != None {
-                let left = self.nodes.get(node.left.unwrap()).unwrap();
+                let left = self.nodes.get(&node.left.unwrap()).unwrap();
                 if !(node.data > left.data) {
                     return false;
                 }
             }
 
             if node.right != None {
-                let right = self.nodes.get(node.right.unwrap()).unwrap();
+                let right = self.nodes.get(&node.right.unwrap()).unwrap();
                 if !(node.data < right.data) {
                     return false;
                 }
@@ -98,17 +102,22 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
 
 
     fn inorder_walk_by_index(&self, x: usize) {
-        if let Some(x_node) = self.nodes.get(x) {
+        let node = self.nodes.get(&x);
+        if node == None {
+            return
+        }
 
-            if x_node.left != None {
-                self.inorder_walk_by_index(x_node.left.unwrap());
-            }
+        let node = node.unwrap();
 
-            println!("{:?}", x_node.data);
 
-            if x_node.right != None {
-                self.inorder_walk_by_index(x_node.right.unwrap());
-            }
+        if node.left != None {
+            self.inorder_walk_by_index(node.left.unwrap());
+        }
+
+        println!("{:?}", node.data);
+
+        if node.right != None {
+            self.inorder_walk_by_index(node.right.unwrap());
         }
     }
 
@@ -117,7 +126,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
     }
 
     fn preorder_walk_by_index(&self, x: usize, level: usize, connect: Vec<bool>) {
-        if let Some(x_node) = self.nodes.get(x) {
+        if let Some(x_node) = self.nodes.get(&x) {
 
             let separator = "|-- ";
             let s = format!("{}{:?}", separator, x_node.data);
@@ -155,7 +164,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         let mut x = self.root;
 
         while x != None {
-            let node = self.nodes.get(x.unwrap()).expect("WTF");
+            let node = self.nodes.get(&x.unwrap()).expect("WTF");
 
             if key == node.data {
                 break;
@@ -170,7 +179,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
 
 
         if x != None {
-            self.nodes.get(x.unwrap())
+            self.nodes.get(&x.unwrap())
         } else {
             None
         }
@@ -180,7 +189,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         let mut x = Some(index);
 
         while x != None {
-            let left = self.nodes.get(x.unwrap()).unwrap().left;
+            let left = self.nodes.get(&x.unwrap()).unwrap().left;
             if left == None {
                 break;
             }
@@ -189,7 +198,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         }
 
         if x != None {
-            self.nodes.get(x.unwrap())
+            self.nodes.get(&x.unwrap())
         } else {
             None
         }
@@ -199,7 +208,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         let mut x = Some(index);
 
         while x != None {
-            let right = self.nodes.get(x.unwrap()).unwrap().right;
+            let right = self.nodes.get(&x.unwrap()).unwrap().right;
             if right == None {
                 break;
             }
@@ -208,14 +217,14 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
         }
 
         if x != None {
-            self.nodes.get(x.unwrap())
+            self.nodes.get(&x.unwrap())
         } else {
             None
         }
     }
 
     pub fn successor(&self, index: usize) -> Option<&Node<T>> {
-        let mut x = self.nodes.get(index).expect("Wrong index");
+        let mut x = self.nodes.get(&index).expect("Wrong index");
 
         if let Some(right_index) = x.right {
             return self.min(right_index);
@@ -223,7 +232,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
 
         if x.parent != None {
             let mut parent = self.nodes
-                .get(x.parent.unwrap())
+                .get(&x.parent.unwrap())
                 .expect("Wrong parent index");
 
             loop {
@@ -236,7 +245,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
                 if parent.parent != None {
                     x = parent;
                     parent = self.nodes
-                        .get(parent.parent.unwrap())
+                        .get(&parent.parent.unwrap())
                         .expect("Wrong parent index");
                 } else {
                     break;
@@ -260,7 +269,7 @@ mod tests {
         bst.insert(2);
         bst.insert(9);
         println!("root {:?}", bst.root);
-        for (i, n) in bst.nodes.iter().enumerate() {
+        for (i, n) in &bst.nodes {
             println!("{}, {:?}", i, n);
         }
         println!("");
@@ -281,7 +290,7 @@ mod tests {
         bst.insert(0);
         bst.insert(1);
         println!("root {:?}", bst.root);
-        for (i, n) in bst.nodes.iter().enumerate() {
+        for (i, n) in &bst.nodes {
             println!("{}, {:?}", i, n);
         }
         println!("");
@@ -345,7 +354,7 @@ mod tests {
         bst.insert(13);
         bst.insert(9);
         println!("root {:?}", bst.root);
-        for (i, n) in bst.nodes.iter().enumerate() {
+        for (i, n) in &bst.nodes {
             println!("{}, {:?}", i, n);
         }
         println!("");
