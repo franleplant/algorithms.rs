@@ -11,6 +11,7 @@ pub fn insertion_sort<T>(arr: &mut [T])
     println!("INPUT = {:?}", arr);
     let len = arr.len();
     for j in 1..len {
+        debug_assert!(sort_invariant(&arr[0..j]));
         println!("\nITERATION = {}\n", j);
         println!("arr {:?}", arr);
         println!("\nvalue = {:?}", arr[j]);
@@ -31,6 +32,25 @@ pub fn insertion_sort<T>(arr: &mut [T])
     }
 
     println!("\nEND\n");
+}
+
+fn sort_invariant<T>(arr: &[T]) -> bool
+    where T: Debug + PartialOrd + Copy
+{
+    if arr.len() == 0 {
+        return true;
+    }
+
+    let mut prev = arr[0];
+    for el in arr {
+        if !(*el >= prev) {
+            return false;
+        }
+
+        prev = *el;
+    }
+
+    true
 }
 
 #[cfg(test)]
