@@ -104,7 +104,7 @@ impl<T: Keyable + Debug + PartialOrd> Bst<T> {
     fn inorder_walk_by_index(&self, x: usize) {
         let node = self.nodes.get(&x);
         if node == None {
-            return
+            return;
         }
 
         let node = node.unwrap();
